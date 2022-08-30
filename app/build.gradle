@@ -4,6 +4,12 @@ plugins {
 }
 
 apply from: '../config/detekt/detekt.gradle'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
+
+def propertiesFile = rootProject.file("keys.properties")
+def properties = new Properties()
+properties.load(new FileInputStream(propertiesFile))
 
 android {
     compileSdk 33
@@ -19,6 +25,10 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        buildConfigField "String", "CLIENT_ID", properties['CLIENT_ID']
+        buildConfigField "String", "CLIENT_SECRET", properties['CLIENT_SECRET']
+        buildConfigField "String", "BASE_URL", '"https://api.imgur.com/3/"'
     }
 
     buildTypes {
@@ -61,4 +71,22 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.2.1"
     debugImplementation "androidx.compose.ui:ui-tooling:1.2.1"
+
+    // OkHttp
+    api(platform("com.squareup.okhttp3:okhttp-bom:4.9.0"))
+    api("com.squareup.okhttp3:okhttp")
+    api("com.squareup.okhttp3:logging-interceptor")
+
+    // Retrofit
+    def retrofit_version = '2.9.0'
+    api "com.squareup.retrofit2:retrofit:$retrofit_version"
+    api "com.squareup.retrofit2:converter-gson:$retrofit_version"
+
+    // Gson
+    api 'com.google.code.gson:gson:2.9.0'
+
+    // Dagger Hilt
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
+    implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
 }
