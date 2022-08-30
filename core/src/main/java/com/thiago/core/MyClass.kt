@@ -1,4 +1,4 @@
 package com.thiago.core
 
-class MyClass {
-}
+//class MyClass {
+//}
