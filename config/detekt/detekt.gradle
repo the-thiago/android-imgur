@@ -1,11 +1,11 @@
 // the code bellow is used to always run detekt before every build
-//apply plugin: "io.gitlab.arturbosch.detekt"
-//
-//project.afterEvaluate {
-//    tasks.named("preBuild") {
-//        dependsOn("detekt")
-//    }
-//}
+apply plugin: "io.gitlab.arturbosch.detekt"
+
+project.afterEvaluate {
+    tasks.named("preBuild") {
+        dependsOn("detekt")
+    }
+}
 // the code above is used to always run detekt before every build
 
 detekt {

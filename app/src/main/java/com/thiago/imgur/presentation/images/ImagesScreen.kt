@@ -90,6 +90,7 @@ private fun ImagesScreen(images: LazyPagingItems<Image>) {
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 private fun ImagesLazyVerticalGrid(images: LazyPagingItems<Image>) {
     LazyVerticalGrid(
@@ -184,6 +185,7 @@ private fun LoadingImagesError(onTryAgainClick: () -> Unit) {
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 private fun Image(image: Image) {
     val context = LocalContext.current
@@ -219,6 +221,7 @@ private fun Image(image: Image) {
     )
 }
 
+@Suppress("MagicNumber")
 @Composable
 private fun ImagesPlaceholder() {
     Column(
