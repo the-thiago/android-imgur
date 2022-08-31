@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Imgur</string>
+
+    <string name="images_loading_error">Error when trying to load images</string>
+    <string name="images_try_again">Try again</string>
+    <string name="error_loading_more_try_again">Error when trying to load the next page. Try again</string>
 </resources>

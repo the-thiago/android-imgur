@@ -23,6 +23,6 @@ class ImagesViewModel @Inject constructor(
     }
 
     private fun getPageConfig() = PagingConfig(
-        pageSize = 20
+        pageSize = 1
     )
 }

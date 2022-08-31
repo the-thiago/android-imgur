@@ -5,27 +5,46 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.ImageLoader
@@ -33,11 +52,50 @@ import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.thiago.core.domain.model.Image
+import com.thiago.imgur.R
 
 @Composable
 fun ImagesScreen(viewModel: ImagesViewModel = hiltViewModel()) {
     val images = viewModel.imagesPagingData().collectAsLazyPagingItems()
+    ImagesScreen(images = images)
+}
+
+@Composable
+private fun ImagesScreen(images: LazyPagingItems<Image>) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        val isRefreshing = images.loadState.refresh == LoadState.Loading
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+            onRefresh = { images.refresh() },
+            indicator = { refreshState, trigger ->
+                SwipeRefreshIndicator(
+                    state = refreshState,
+                    refreshTriggerDistance = trigger,
+                    contentColor = MaterialTheme.colors.primary
+                )
+            },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when {
+                isRefreshing -> ImagesPlaceholder()
+                images.loadState.refresh is LoadState.Error -> {
+                    LoadingImagesError(onTryAgainClick = images::refresh)
+                }
+                else -> ImagesLazyVerticalGrid(images = images)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ImagesLazyVerticalGrid(images: LazyPagingItems<Image>) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         contentPadding = PaddingValues(8.dp),
@@ -47,6 +105,68 @@ fun ImagesScreen(viewModel: ImagesViewModel = hiltViewModel()) {
     ) {
         items(images) {
             it?.let { Image(image = it) }
+        }
+        item(span = { GridItemSpan(4) }) {
+            LoadingIndicator(
+                isLoading = images.loadState.append == LoadState.Loading
+            )
+            AppendImagesError(
+                showError = images.loadState.append is LoadState.Error,
+                onTryAgainClick = images::retry
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingIndicator(isLoading: Boolean) {
+    if (isLoading) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(modifier = Modifier.padding(vertical = 16.dp))
+        }
+    }
+}
+
+@Composable
+private fun AppendImagesError(showError: Boolean, onTryAgainClick: () -> Unit) {
+    if (showError) {
+        Text(
+            modifier = Modifier
+                .clickable { onTryAgainClick() }
+                .fillMaxWidth()
+                .padding(vertical = 24.dp, horizontal = 16.dp),
+            text = stringResource(id = R.string.error_loading_more_try_again),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun LoadingImagesError(onTryAgainClick: () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_dissatisfied),
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(id = R.string.images_loading_error),
+            textAlign = TextAlign.Center,
+            fontSize = 32.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { onTryAgainClick() }) {
+            Text(text = stringResource(id = R.string.images_try_again))
         }
     }
 }
@@ -84,6 +204,33 @@ private fun Image(image: Image) {
             .background(color = Color.LightGray, shape = RoundedCornerShape(4.dp))
             .clip(RoundedCornerShape(2.dp))
     )
+}
+
+@Composable
+private fun ImagesPlaceholder() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(state = rememberScrollState(), enabled = false)
+    ) {
+        repeat(6) {
+            Row {
+                repeat(3) {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(144.dp)
+                            .placeholder(
+                                visible = true,
+                                highlight = PlaceholderHighlight.shimmer(),
+                                shape = RoundedCornerShape(2.dp)
+                            )
+                    )
+                }
+            }
+        }
+
+    }
 }
 
 private fun <T : Any> LazyGridScope.items(
