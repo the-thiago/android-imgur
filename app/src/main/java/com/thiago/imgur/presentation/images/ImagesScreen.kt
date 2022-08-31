@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -55,6 +56,7 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.thiago.core.domain.model.Image
 import com.thiago.imgur.R
+import com.thiago.imgur.presentation.core.TestTags
 import com.thiago.imgur.presentation.core.items
 
 @Composable
@@ -101,7 +103,10 @@ private fun ImagesLazyVerticalGrid(images: LazyPagingItems<Image>) {
         modifier = Modifier.fillMaxSize(),
     ) {
         item(span = { GridItemSpan(4) }) {
-            HeaderLoadRemoteData(images = images)
+            HeaderLoadRemoteData(
+                show = images.loadState.mediator?.refresh is LoadState.Error && images.itemCount > 0,
+                onTryClick = images::refresh
+            )
         }
         items(images) {
             it?.let { Image(image = it) }
@@ -119,13 +124,17 @@ private fun ImagesLazyVerticalGrid(images: LazyPagingItems<Image>) {
 }
 
 @Composable
-private fun HeaderLoadRemoteData(images: LazyPagingItems<Image>) {
-    if (images.loadState.mediator?.refresh is LoadState.Error && images.itemCount > 0) {
+fun HeaderLoadRemoteData(
+    show: Boolean,
+    onTryClick: () -> Unit
+) {
+    if (show) {
         Text(
             modifier = Modifier
-                .clickable { images.refresh() }
+                .clickable { onTryClick() }
                 .fillMaxWidth()
-                .padding(vertical = 24.dp, horizontal = 16.dp),
+                .padding(vertical = 24.dp, horizontal = 16.dp)
+                .testTag(TestTags.HeaderLoadRemoteData),
             text = stringResource(id = R.string.error_refreshing_data),
             textAlign = TextAlign.Center
         )
@@ -133,10 +142,12 @@ private fun HeaderLoadRemoteData(images: LazyPagingItems<Image>) {
 }
 
 @Composable
-private fun LoadingIndicator(isLoading: Boolean) {
+fun LoadingIndicator(isLoading: Boolean) {
     if (isLoading) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(TestTags.LoadingIndicator),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -146,13 +157,14 @@ private fun LoadingIndicator(isLoading: Boolean) {
 }
 
 @Composable
-private fun AppendImagesError(showError: Boolean, onTryAgainClick: () -> Unit) {
+fun AppendImagesError(showError: Boolean, onTryAgainClick: () -> Unit) {
     if (showError) {
         Text(
             modifier = Modifier
                 .clickable { onTryAgainClick() }
                 .fillMaxWidth()
-                .padding(vertical = 24.dp, horizontal = 16.dp),
+                .padding(vertical = 24.dp, horizontal = 16.dp)
+                .testTag(TestTags.AppendImagesError),
             text = stringResource(id = R.string.error_loading_more_try_again),
             textAlign = TextAlign.Center
         )
@@ -160,13 +172,14 @@ private fun AppendImagesError(showError: Boolean, onTryAgainClick: () -> Unit) {
 }
 
 @Composable
-private fun LoadingImagesError(onTryAgainClick: () -> Unit) {
+fun LoadingImagesError(onTryAgainClick: () -> Unit) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .testTag(TestTags.LoadingImagesError)
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_dissatisfied),
