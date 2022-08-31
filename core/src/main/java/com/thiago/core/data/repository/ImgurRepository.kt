@@ -8,7 +8,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface ImgurRepository {
 
-    fun getImages(): PagingSource<Int, Image>
-
     fun getCachedImages(pagingConfig: PagingConfig): Flow<PagingData<Image>>
 }

@@ -21,10 +21,6 @@ class ImgurRepositoryImpl @Inject constructor(
     private val database: AppDatabase
 ) : ImgurRepository {
 
-    override fun getImages(): PagingSource<Int, Image> {
-        return ImagesPagingSource(remoteDataSource)
-    }
-
     @OptIn(ExperimentalPagingApi::class)
     override fun getCachedImages(pagingConfig: PagingConfig): Flow<PagingData<Image>> {
         return Pager(

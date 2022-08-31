@@ -84,17 +84,11 @@ private fun ImagesScreen(images: LazyPagingItems<Image>) {
             modifier = Modifier.fillMaxSize()
         ) {
             when {
-                (images.loadState.source.refresh is LoadState.NotLoading ||
-                        images.loadState.mediator?.refresh is LoadState.NotLoading) -> {
-                    ImagesLazyVerticalGrid(images = images)
-                }
                 isRefreshing -> ImagesPlaceholder()
-                images.loadState.mediator?.refresh is LoadState.Error -> {
+                (images.loadState.refresh is LoadState.Error && images.itemCount == 0) -> {
                     LoadingImagesError(onTryAgainClick = images::refresh)
                 }
-                images.loadState.refresh is LoadState.Error && images.itemCount == 0 -> {
-                    LoadingImagesError(onTryAgainClick = images::refresh)
-                }
+                else -> ImagesLazyVerticalGrid(images = images)
             }
         }
     }

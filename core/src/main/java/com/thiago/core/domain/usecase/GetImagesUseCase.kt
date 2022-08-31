@@ -22,9 +22,6 @@ class GetImagesUseCaseImpl @Inject constructor(
     override fun createFlowObservable(
         params: GetImagesUseCase.GetImagesParams
     ): Flow<PagingData<Image>> {
-//        return Pager(config = params.pagingConfig) {
-//            imgurRepository.getImages()
-//        }.flow
         return imgurRepository.getCachedImages(params.pagingConfig)
     }
 }
