@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 @InstallIn(SingletonComponent::class)
 object RemoteModule {
 
-    private const val TIMEOUT_SECONDS = 15L
+    private const val TIMEOUT_SECONDS = 12L
 
     @Provides
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {

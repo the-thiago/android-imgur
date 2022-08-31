@@ -4,12 +4,10 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
 import androidx.paging.map
 import com.thiago.core.data.remote.ImgurRemoteDataSource
 import com.thiago.core.data.repository.ImgurRepository
 import com.thiago.core.domain.model.Image
-import com.thiago.imgur.framework.data.ImagesPagingSource
 import com.thiago.imgur.framework.data.ImagesRemoteMediator
 import com.thiago.imgur.framework.data.local.AppDatabase
 import kotlinx.coroutines.flow.Flow
