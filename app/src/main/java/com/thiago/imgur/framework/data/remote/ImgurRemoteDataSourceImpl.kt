@@ -21,6 +21,6 @@ class ImgurRemoteDataSourceImpl @Inject constructor(
                 }
             }
         }
-        return ImagePaging(offset = 0, total = 0, images = images)
+        return ImagePaging(total = images.size, images = images)
     }
 }

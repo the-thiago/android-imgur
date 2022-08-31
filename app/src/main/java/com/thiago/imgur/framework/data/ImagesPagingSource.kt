@@ -12,30 +12,17 @@ class ImagesPagingSource(
     @Suppress("TooGenericExceptionCaught")
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Image> {
         return try {
-            val offset = params.key ?: 0
+            val pageNumber = params.key ?: 0
 
-            val queries = hashMapOf(
-                "offset" to offset.toString()
-            )
+            val imagesPaging = remoteDataSource.getImages(pageNumber)
 
-//            if (query.isNotEmpty()) {
-//                queries["nameStartsWith"] = query
-//            }
-
-            val imagesPaging = remoteDataSource.getImages(0)
-
-//            val responseOffset = imagesPaging.offset
-//            val totalImages = imagesPaging.total
+            val prevKey = if (pageNumber > 0) pageNumber - 1 else null
+            val nextKey = if (imagesPaging.total > 0) pageNumber + 1 else null
 
             LoadResult.Page(
                 data = imagesPaging.images,
-                prevKey = null,
-                nextKey = null
-//                if (responseOffset < totalImages) {
-//                    responseOffset + LIMIT
-//                } else {
-//                    null
-//                }
+                prevKey = prevKey,
+                nextKey = nextKey
             )
         } catch (exception: Exception) {
             LoadResult.Error(exception)
@@ -43,13 +30,9 @@ class ImagesPagingSource(
     }
 
     override fun getRefreshKey(state: PagingState<Int, Image>): Int? {
-        return state.anchorPosition?.let { anchorPosition ->
-            val anchorPage = state.closestPageToPosition(anchorPosition)
-            anchorPage?.prevKey?.plus(LIMIT) ?: anchorPage?.nextKey?.minus(LIMIT)
+        return state.anchorPosition?.let {
+            state.closestPageToPosition(it)?.prevKey?.plus(1)
+                ?: state.closestPageToPosition(it)?.nextKey?.minus(1)
         }
-    }
-
-    companion object {
-        private const val LIMIT = 20
     }
 }
