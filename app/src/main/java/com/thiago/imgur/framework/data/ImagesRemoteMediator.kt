@@ -60,7 +60,6 @@ class ImagesRemoteMediator @Inject constructor(
 
                 val imagesEntities = imagesPaging.images.map {
                     ImageEntity(
-                        id = it.id,
                         description = it.description,
                         url = it.url,
                         isGif = it.isGif

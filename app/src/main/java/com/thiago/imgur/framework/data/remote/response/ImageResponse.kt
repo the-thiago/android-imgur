@@ -4,8 +4,6 @@ import com.google.gson.annotations.SerializedName
 import com.thiago.core.domain.model.Image
 
 data class ImageResponse(
-    @SerializedName("id")
-    val id: String?,
     @SerializedName("description")
     val description: String?,
     @SerializedName("link")
@@ -16,7 +14,6 @@ data class ImageResponse(
 
 fun ImageResponse.toImage(): Image {
     return Image(
-        id = this.id ?: "",
         description = this.description ?: "",
         url = this.url ?: "",
         isGif = this.type == "image/gif"

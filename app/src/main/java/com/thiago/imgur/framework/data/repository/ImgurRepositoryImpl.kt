@@ -29,7 +29,6 @@ class ImgurRepositoryImpl @Inject constructor(
         }.flow.map { pagingData ->
             pagingData.map { imageEntity ->
                 Image(
-                    id = imageEntity.id,
                     description = imageEntity.description,
                     url = imageEntity.url,
                     isGif = imageEntity.isGif,
