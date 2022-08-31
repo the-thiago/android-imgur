@@ -1,8 +1,8 @@
 package com.thiago.core.data.remote
 
-import com.thiago.core.domain.model.Image
+import com.thiago.core.domain.model.ImagePaging
 
 interface ImgurRemoteDataSource {
 
-    fun getImages(query: String): Image
+    suspend fun getImages(page: Int): ImagePaging
 }

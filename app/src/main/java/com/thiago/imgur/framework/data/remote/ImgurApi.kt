@@ -1,10 +1,12 @@
 package com.thiago.imgur.framework.data.remote
 
-import com.thiago.core.domain.model.Image
+import com.thiago.imgur.framework.data.remote.response.DataWrapperResponse
 import retrofit2.http.GET
+import retrofit2.http.Headers
+import retrofit2.http.Query
 
 interface ImgurApi {
 
-    @GET("gallery")
-    suspend fun getImages(): Image
+    @GET("gallery/search/?q=cats")
+    suspend fun getImages(@Query("page") page: Int): DataWrapperResponse
 }
