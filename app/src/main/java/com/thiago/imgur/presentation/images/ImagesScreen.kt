@@ -1,6 +1,7 @@
 package com.thiago.imgur.presentation.images
 
 import android.annotation.SuppressLint
+import android.os.Build.VERSION.SDK_INT
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.foundation.background
@@ -15,6 +16,9 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -24,7 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import com.thiago.core.domain.model.Image
 
@@ -46,11 +53,30 @@ fun ImagesScreen(viewModel: ImagesViewModel = hiltViewModel()) {
 
 @Composable
 private fun Image(image: Image) {
+    val context = LocalContext.current
+    val imageLoader by remember(image) {
+        val loader = if (image.isGif) {
+            ImageLoader.Builder(context)
+                .components {
+                    if (SDK_INT >= 28) {
+                        add(ImageDecoderDecoder.Factory())
+                    } else {
+                        add(GifDecoder.Factory())
+                    }
+                }
+                .build()
+        } else {
+            ImageLoader.Builder(context).build()
+        }
+        mutableStateOf(loader)
+    }
+
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(image.url)
             .build(),
-        contentDescription = null,
+        imageLoader = imageLoader,
+        contentDescription = image.description,
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()

@@ -3,6 +3,7 @@ package com.thiago.imgur.framework.data.remote
 import com.thiago.core.data.remote.ImgurRemoteDataSource
 import com.thiago.core.domain.model.Image
 import com.thiago.core.domain.model.ImagePaging
+import com.thiago.imgur.framework.data.remote.response.toImage
 import javax.inject.Inject
 
 class ImgurRemoteDataSourceImpl @Inject constructor(
@@ -14,10 +15,11 @@ class ImgurRemoteDataSourceImpl @Inject constructor(
         val images = mutableListOf<Image>()
         response.data?.forEach { data ->
             data.images?.forEach { image ->
-                if (image.link?.isNotBlank() == true &&
-                    (image.type.contains("jpeg") || image.type.contains("png"))
+                if (image.url?.isNotBlank() == true &&
+                    image.type?.isNotBlank() == true &&
+                    image.type.contains("image/")
                 ) {
-                    images.add(Image(url = image.link))
+                    images.add(image.toImage())
                 }
             }
         }
