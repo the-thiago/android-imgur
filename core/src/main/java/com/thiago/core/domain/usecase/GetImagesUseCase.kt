@@ -1,6 +1,5 @@
 package com.thiago.core.domain.usecase
 
-import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.thiago.core.data.repository.ImgurRepository
@@ -23,8 +22,9 @@ class GetImagesUseCaseImpl @Inject constructor(
     override fun createFlowObservable(
         params: GetImagesUseCase.GetImagesParams
     ): Flow<PagingData<Image>> {
-        return Pager(config = params.pagingConfig) {
-            imgurRepository.getImages()
-        }.flow
+//        return Pager(config = params.pagingConfig) {
+//            imgurRepository.getImages()
+//        }.flow
+        return imgurRepository.getCachedImages(params.pagingConfig)
     }
 }

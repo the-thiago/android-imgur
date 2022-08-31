@@ -70,7 +70,7 @@ fun ImagesScreen(viewModel: ImagesViewModel = hiltViewModel()) {
 @Composable
 private fun ImagesScreen(images: LazyPagingItems<Image>) {
     Column(modifier = Modifier.fillMaxSize()) {
-        val isRefreshing = images.loadState.refresh == LoadState.Loading
+        val isRefreshing = images.loadState.mediator?.refresh is LoadState.Loading
         SwipeRefresh(
             state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
             onRefresh = { images.refresh() },
@@ -84,11 +84,17 @@ private fun ImagesScreen(images: LazyPagingItems<Image>) {
             modifier = Modifier.fillMaxSize()
         ) {
             when {
+                (images.loadState.source.refresh is LoadState.NotLoading ||
+                        images.loadState.mediator?.refresh is LoadState.NotLoading) -> {
+                    ImagesLazyVerticalGrid(images = images)
+                }
                 isRefreshing -> ImagesPlaceholder()
-                images.loadState.refresh is LoadState.Error -> {
+                images.loadState.mediator?.refresh is LoadState.Error -> {
                     LoadingImagesError(onTryAgainClick = images::refresh)
                 }
-                else -> ImagesLazyVerticalGrid(images = images)
+                images.loadState.refresh is LoadState.Error && images.itemCount == 0 -> {
+                    LoadingImagesError(onTryAgainClick = images::refresh)
+                }
             }
         }
     }
@@ -103,6 +109,9 @@ private fun ImagesLazyVerticalGrid(images: LazyPagingItems<Image>) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
+        item(span = { GridItemSpan(4) }) {
+            HeaderLoadRemoteData(images = images)
+        }
         items(images) {
             it?.let { Image(image = it) }
         }
@@ -115,6 +124,20 @@ private fun ImagesLazyVerticalGrid(images: LazyPagingItems<Image>) {
                 onTryAgainClick = images::retry
             )
         }
+    }
+}
+
+@Composable
+private fun HeaderLoadRemoteData(images: LazyPagingItems<Image>) {
+    if (images.loadState.mediator?.refresh is LoadState.Error && images.itemCount > 0) {
+        Text(
+            modifier = Modifier
+                .clickable { images.refresh() }
+                .fillMaxWidth()
+                .padding(vertical = 24.dp, horizontal = 16.dp),
+            text = stringResource(id = R.string.error_refreshing_data),
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -211,25 +234,27 @@ private fun ImagesPlaceholder() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(state = rememberScrollState(), enabled = false)
+            .padding(8.dp)
+            .verticalScroll(state = rememberScrollState(), enabled = false),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         repeat(6) {
-            Row {
-                repeat(3) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                repeat(4) {
                     Spacer(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .weight(1f)
                             .height(144.dp)
                             .placeholder(
                                 visible = true,
                                 highlight = PlaceholderHighlight.shimmer(),
                                 shape = RoundedCornerShape(2.dp)
                             )
+                            .clip(RoundedCornerShape(2.dp))
                     )
                 }
             }
         }
-
     }
 }
 
