@@ -3,6 +3,21 @@
 ### About
 The app is a cat gallery built using the Imgur API.
 
+### How to run
+
+After downloading the repository, create a file called "keys.properties" and insert the api keys. API Link: https://apidocs.imgur.com/
+
+CLIENT_ID="your key here"
+
+CLIENT_SECRET="your key here"
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/39228080/187809966-6e94ce39-ec2a-4e36-a15a-412fb48dfd03.png"/>
+</div>
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/39228080/187810345-2a874141-4c96-4f69-83fc-25f48d56babe.png"/>
+</div>
+
 ### Technologies
 
 - MVVM architecture
